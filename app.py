@@ -1,13 +1,18 @@
-# app.py - The lighter, regex-only version
+# app.py
+
 import re
 import pandas as pd
 from flask import Flask, request, jsonify
+from flask_cors import CORS # 1. IMPORT CORS HERE
 
 app = Flask(__name__)
+CORS(app) # 2. INITIALIZE CORS HERE
+
+# --- (The rest of your code remains exactly the same) ---
 
 # Load and preprocess the dataset on startup
 try:
-    machines_df = pd.read_csv("Caterpillar_Machines_Sample.xlsx - Sheet1.csv")
+    machines_df = pd.read_excel("Caterpillar_Machines_Sample.xlsx")
     machines_df.rename(columns={'Payload (kg)': 'LoadCapacity'}, inplace=True)
     if 'Price' not in machines_df.columns:
         machines_df['Price'] = machines_df.get('Weight (kg)', 0) * 1.5 + 500000
@@ -21,7 +26,6 @@ except FileNotFoundError:
     machines_df = pd.DataFrame()
 
 def parse_text_regex(text: str) -> dict:
-    """Extracts features from text using regular expressions."""
     text = text.lower()
     budget_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|lac)', text)
     load_match = re.search(r'(\d+)\s*(?:ton|tons|t)', text)
@@ -34,7 +38,6 @@ def parse_text_regex(text: str) -> dict:
     return {"budget": budget, "load": load, "power": power}
 
 def recommend_machine(params: dict) -> list:
-    """Filters the machine dataset based on extracted parameters."""
     if machines_df.empty: return []
     df = machines_df.copy()
     if 'LoadCapacity' in df.columns and df['LoadCapacity'].mean() > 1000:
