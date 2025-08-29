@@ -1,5 +1,4 @@
 Flask
 pandas
 gunicorn
-openpyxl
 Flask-Cors
